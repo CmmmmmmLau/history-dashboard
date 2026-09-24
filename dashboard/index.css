@@ -13,18 +13,25 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
 
 .dashboard { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
+.dashboard.is-calendar-hidden { grid-template-columns: minmax(0, 1fr); }
+.dashboard.is-calendar-hidden history-calendar { display: none; }
 .content { min-width: 0; }
 .content-toolbar { position: sticky; top: 0; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr); align-items: center; gap: 8px 16px; min-height: 48px; padding: 6px 16px; border-bottom: 1px solid #e2e6ea; background: #fff; }
-.search-area { min-width: 0; }
+.search-area { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .heading { display: flex; align-items: baseline; justify-self: center; gap: 12px; min-width: 0; }
 h1 { overflow: hidden; margin: 0; font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 #count { color: #78838f; white-space: nowrap; font-size: 12px; }
-.search-area input { width: min(280px, 100%); height: 30px; padding: 0 10px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; font-size: 12px; }
+.search-area input { min-width: 0; width: min(280px, 100%); height: 30px; padding: 0 10px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; font-size: 12px; }
+#toggle-calendar { display: grid; place-items: center; flex: none; width: 30px; height: 30px; padding: 0; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; color: #4b5663; }
+#toggle-calendar::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("./assets/system-uicons--calendar-days.svg") center / contain no-repeat; mask: url("./assets/system-uicons--calendar-days.svg") center / contain no-repeat; }
+#toggle-calendar:hover { background: #f4f6f8; }
+#toggle-calendar[aria-expanded="true"] { border-color: #cbd9e9; background: #eef3fa; color: #2561aa; }
 .actions { display: flex; align-items: center; justify-self: end; gap: 8px; }
 .actions button { height: 30px; padding: 0 11px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; color: #4b5663; font-size: 12px; }
 .actions button:hover { background: #f4f6f8; }
 @media (max-width: 800px) {
   .dashboard { grid-template-columns: 252px minmax(0, 1fr); }
+  .content-toolbar { grid-template-columns: minmax(0, 1fr) auto auto; }
 }
 
 @media (max-width: 560px) {

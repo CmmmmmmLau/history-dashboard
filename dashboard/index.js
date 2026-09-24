@@ -2,6 +2,8 @@ import "./components/history-calendar.js";
 import "./components/history-list.js";
 
 const calendar = document.querySelector("history-calendar");
+const dashboard = document.querySelector(".dashboard");
+const toggleCalendarButton = document.querySelector("#toggle-calendar");
 const selectedDateLabel = document.querySelector("#selected-date");
 const searchInput = document.querySelector("#search");
 const refreshButton = document.querySelector("#refresh");
@@ -86,6 +88,12 @@ searchInput.addEventListener("input", () => {
   searchTimer = setTimeout(loadHistory, 250);
 });
 refreshButton.addEventListener("click", loadHistory);
+toggleCalendarButton.addEventListener("click", () => {
+  const hidden = dashboard.classList.toggle("is-calendar-hidden");
+  toggleCalendarButton.setAttribute("aria-expanded", String(!hidden));
+  toggleCalendarButton.setAttribute("aria-label", hidden ? "显示日历" : "隐藏日历");
+  toggleCalendarButton.title = hidden ? "显示日历" : "隐藏日历";
+});
 
 selectedDateLabel.textContent = rangeLabel(calendar.selectedRange.startDate, calendar.selectedRange.endDate);
 loadHistory();

@@ -9,11 +9,12 @@
   </head>
   <body>
     <main class="dashboard">
-      <history-calendar role="complementary" aria-label="选择日期范围"></history-calendar>
+      <history-calendar id="calendar" role="complementary" aria-label="选择日期范围"></history-calendar>
 
       <section class="content" aria-label="所选日期范围的历史记录">
         <header class="content-toolbar">
           <div class="search-area">
+            <button id="toggle-calendar" type="button" aria-controls="calendar" aria-expanded="true" aria-label="隐藏日历" title="隐藏日历"></button>
             <label class="sr-only" for="search">搜索所选范围的记录</label>
             <input id="search" type="search" placeholder="搜索所选范围的标题或网址" autocomplete="off" />
           </div>
