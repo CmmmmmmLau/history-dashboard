@@ -23,10 +23,14 @@
             <span id="count" aria-live="polite"></span>
           </div>
           <div class="actions">
-            <div class="view-switcher" role="group" aria-label="历史记录视图">
-              <button id="list-view" type="button" aria-pressed="true" aria-label="日视图" title="日视图">日</button>
-              <button id="week-view" type="button" aria-pressed="false" aria-label="周视图" title="周视图">周</button>
-              <button id="month-view" type="button" aria-pressed="false" aria-label="月视图" title="月视图">月</button>
+            <div class="range-navigation">
+              <button id="previous-range" type="button" aria-label="上一日" title="上一日"></button>
+              <button id="next-range" type="button" aria-label="下一日" title="下一日" disabled></button>
+              <div class="view-switcher" role="group" aria-label="历史记录视图">
+                <button id="list-view" type="button" aria-pressed="true" aria-label="日视图" title="日视图">日</button>
+                <button id="week-view" type="button" aria-pressed="false" aria-label="周视图" title="周视图">周</button>
+                <button id="month-view" type="button" aria-pressed="false" aria-label="月视图" title="月视图">月</button>
+              </div>
             </div>
             <button id="refresh" type="button" aria-label="刷新" title="刷新"></button>
           </div>

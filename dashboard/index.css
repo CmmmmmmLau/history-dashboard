@@ -35,6 +35,12 @@ h1 { overflow: hidden; margin: 0; font-size: 15px; font-weight: 700; text-overfl
 .actions { display: flex; align-items: center; justify-self: end; gap: 8px; }
 .actions button { height: 30px; padding: 0 11px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; color: #4b5663; font-size: 12px; }
 .actions button:hover { background: #f4f6f8; }
+.range-navigation { display: flex; align-items: center; gap: 6px; }
+.range-navigation > button { display: grid; place-items: center; width: 30px; padding: 0; }
+.range-navigation > button::before { content: ""; width: 20px; height: 20px; background: currentColor; -webkit-mask: url("./assets/system-uicons--chevron-left.svg") center / contain no-repeat; mask: url("./assets/system-uicons--chevron-left.svg") center / contain no-repeat; }
+#next-range::before { transform: rotate(180deg); }
+.range-navigation > button:disabled,
+.range-navigation > button:disabled:hover { background: #fff; color: #b7bec6; cursor: default; }
 .view-switcher { display: flex; align-items: center; }
 .view-switcher button { border-radius: 0; }
 .view-switcher button + button { margin-left: -1px; }

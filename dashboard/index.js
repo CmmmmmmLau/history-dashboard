@@ -10,6 +10,8 @@ const toggleCalendarButton = document.querySelector("#toggle-calendar");
 const listViewButton = document.querySelector("#list-view");
 const weekViewButton = document.querySelector("#week-view");
 const monthViewButton = document.querySelector("#month-view");
+const previousRangeButton = document.querySelector("#previous-range");
+const nextRangeButton = document.querySelector("#next-range");
 const selectedDateLabel = document.querySelector("#selected-date");
 const searchInput = document.querySelector("#search");
 const refreshButton = document.querySelector("#refresh");
@@ -32,6 +34,15 @@ function rangeLabel(startDate, endDate) {
   if (startDate.getTime() === endDate.getTime()) return dateLabel(startDate);
   const shortDate = date => `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
   return `${shortDate(startDate)} — ${shortDate(endDate)}`;
+}
+
+function updateRangeNavigation() {
+  const unit = currentView === "week" ? "周" : currentView === "month" ? "月" : "日";
+  previousRangeButton.setAttribute("aria-label", `上一${unit}`);
+  previousRangeButton.title = `上一${unit}`;
+  nextRangeButton.setAttribute("aria-label", `下一${unit}`);
+  nextRangeButton.title = `下一${unit}`;
+  nextRangeButton.disabled = !calendar.canMoveNext;
 }
 
 async function loadHistory() {
@@ -101,6 +112,7 @@ async function loadHistory() {
 }
 
 calendar.addEventListener("range-change", event => {
+  updateRangeNavigation();
   if (currentView === "month") {
     const date = event.detail.startDate;
     selectedDateLabel.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月`;
@@ -124,6 +136,8 @@ searchInput.addEventListener("input", () => {
   searchTimer = setTimeout(loadHistory, 250);
 });
 refreshButton.addEventListener("click", loadHistory);
+previousRangeButton.addEventListener("click", () => calendar.shiftSelection(-1));
+nextRangeButton.addEventListener("click", () => calendar.shiftSelection(1));
 function selectView(view) {
   if (view === currentView) return;
   currentView = view;
@@ -147,4 +161,5 @@ toggleCalendarButton.addEventListener("click", () => {
 });
 
 selectedDateLabel.textContent = rangeLabel(calendar.selectedRange.startDate, calendar.selectedRange.endDate);
+updateRangeNavigation();
 loadHistory();

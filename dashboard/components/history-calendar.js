@@ -72,12 +72,36 @@ class HistoryCalendar extends HTMLElement {
     return new Date(this._anchorDate);
   }
 
+  get canMoveNext() {
+    const today = new Date();
+    return (this._rangeEnd ?? this._rangeStart) < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  }
+
   get firstDayOfWeek() {
     return this._firstDayOfWeek;
   }
 
   selectDate(date) {
     this._selectDate(date);
+  }
+
+  shiftSelection(direction) {
+    if (direction !== -1 && direction !== 1) throw new TypeError("Direction must be -1 or 1");
+    if (direction === 1 && !this.canMoveNext) return;
+
+    if (this._selectionMode === "month") {
+      this._selectDate(new Date(this._rangeStart.getFullYear(), this._rangeStart.getMonth() + direction, 1));
+    } else if (this._selectionMode === "week") {
+      this._selectDate(new Date(this._rangeStart.getFullYear(), this._rangeStart.getMonth(), this._rangeStart.getDate() + direction * 7));
+    } else {
+      const shiftDay = date => new Date(date.getFullYear(), date.getMonth(), date.getDate() + direction);
+      this._rangeStart = shiftDay(this._rangeStart);
+      if (this._rangeEnd) this._rangeEnd = shiftDay(this._rangeEnd);
+      this._anchorDate = shiftDay(this._anchorDate);
+      this._visibleYear = this._anchorDate.getFullYear();
+      this._render();
+      this._emitRangeChange();
+    }
   }
 
   set selectionMode(mode) {
