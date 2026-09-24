@@ -1,0 +1,37 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid #e2e6ea;
+  background: #fff;
+}
+
+* { box-sizing: border-box; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible { outline: 2px solid #3274c6; outline-offset: -2px; }
+.calendar-toolbar { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 10px; border-bottom: 1px solid #e7eaee; background: #fff; font-size: 13px; }
+.year-navigation { display: flex; align-items: center; gap: 2px; }
+.year-navigation strong { min-width: 48px; text-align: center; }
+.calendar-toolbar button { min-width: 25px; height: 26px; padding: 0 4px; border: 0; border-radius: 4px; background: transparent; color: #566272; }
+.calendar-toolbar button:hover { background: #f1f3f6; }
+.calendar-toolbar button:disabled { color: #b7bec6; cursor: default; }
+.calendar-toolbar button:disabled:hover { background: transparent; }
+.calendar-toolbar #today { padding: 0 7px; font-size: 12px; }
+.weekdays { position: sticky; top: 48px; z-index: 2; display: grid; grid-template-columns: repeat(7, 1fr); height: 27px; align-items: center; border-bottom: 1px solid #e7eaee; background: #fff; color: #68717c; text-align: center; font-size: 11px; }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); border-left: 1px solid #f7f8fa; }
+.day-button, .empty-day { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 44px; border: 0; border-right: 1px solid #f7f8fa; border-bottom: 1px solid #f7f8fa; background: transparent; color: #3e4955; font-size: 11px; }
+.striped-month { background: #fafbfc; }
+.day-button:not(:disabled):hover { background: #eef3fa; }
+.day-button.future-day { color: #b3bbc5; cursor: default; }
+.day-button.future-day .month-label { color: #8996a5; }
+.day-button.is-today { color: #2561aa; font-weight: 700; }
+.day-button.is-in-range { background: #fff9e8; }
+.day-button.is-range-start, .day-button.is-range-end,
+.day-button.is-range-start:hover, .day-button.is-range-end:hover { background: #fff0bb; color: #342900; font-weight: 700; }
+.month-label { display: block; margin-top: 2px; color: #4d5d70; font-size: 11px; font-weight: 700; line-height: 1; white-space: nowrap; }
+
+@media (max-width: 560px) {
+  :host { position: static; height: 255px; border-right: 0; border-bottom: 1px solid #e2e6ea; }
+}
