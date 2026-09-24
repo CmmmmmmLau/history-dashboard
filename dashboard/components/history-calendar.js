@@ -68,8 +68,20 @@ class HistoryCalendar extends HTMLElement {
     };
   }
 
+  get selectedDate() {
+    return new Date(this._anchorDate);
+  }
+
+  get firstDayOfWeek() {
+    return this._firstDayOfWeek;
+  }
+
+  selectDate(date) {
+    this._selectDate(date);
+  }
+
   set selectionMode(mode) {
-    if (mode !== "range" && mode !== "week") throw new TypeError(`Unsupported calendar selection mode: ${mode}`);
+    if (mode !== "range" && mode !== "week" && mode !== "month") throw new TypeError(`Unsupported calendar selection mode: ${mode}`);
     if (mode === this._selectionMode) return;
     this._selectionMode = mode;
     this._selectDate(this._anchorDate);
@@ -97,6 +109,17 @@ class HistoryCalendar extends HTMLElement {
     const selected = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const today = new Date();
     if (selected > new Date(today.getFullYear(), today.getMonth(), today.getDate())) return;
+
+    if (this._selectionMode === "month") {
+      this._anchorDate = selected;
+      this._rangeStart = new Date(selected.getFullYear(), selected.getMonth(), 1);
+      this._rangeEnd = new Date(selected.getFullYear(), selected.getMonth() + 1, 0);
+      this._visibleYear = selected.getFullYear();
+      this._render();
+      if (preserveFocus) this._focusDate(selected);
+      this._emitRangeChange();
+      return;
+    }
 
     if (this._selectionMode === "week") {
       const offset = (selected.getDay() - this._firstDayOfWeek + 7) % 7;

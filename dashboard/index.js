@@ -1,6 +1,7 @@
 import "./components/history-calendar.js";
 import "./components/history-list.js";
 import "./components/history-week.js";
+import "./components/history-month.js";
 
 const calendar = document.querySelector("history-calendar");
 const dashboard = document.querySelector(".dashboard");
@@ -8,17 +9,20 @@ const content = document.querySelector(".content");
 const toggleCalendarButton = document.querySelector("#toggle-calendar");
 const listViewButton = document.querySelector("#list-view");
 const weekViewButton = document.querySelector("#week-view");
+const monthViewButton = document.querySelector("#month-view");
 const selectedDateLabel = document.querySelector("#selected-date");
 const searchInput = document.querySelector("#search");
 const refreshButton = document.querySelector("#refresh");
 const count = document.querySelector("#count");
 const historyList = document.querySelector("history-list");
 const historyWeek = document.querySelector("history-week");
+const historyMonth = document.querySelector("history-month");
 
 const weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 let requestId = 0;
 let searchTimer;
 let currentView = "list";
+let activeMonthKey = null;
 
 function dateLabel(date) {
   return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdayNames[date.getDay()]}`;
@@ -32,12 +36,15 @@ function rangeLabel(startDate, endDate) {
 
 async function loadHistory() {
   const currentRequest = ++requestId;
-  const view = currentView === "week" ? historyWeek : historyList;
+  const view = currentView === "week" ? historyWeek : currentView === "month" ? historyMonth : historyList;
   view.showStatus("正在加载历史记录…");
   count.textContent = "";
 
   const { startDate, endDate } = calendar.selectedRange;
   if (currentView === "week") historyWeek.weekStart = startDate;
+  if (currentView === "month") {
+    historyMonth.monthStart = startDate;
+  }
   const startTime = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()).getTime();
   const endTime = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() + 1).getTime();
   const query = searchInput.value.trim();
@@ -77,6 +84,8 @@ async function loadHistory() {
 
     if (currentView === "week") {
       historyWeek.records = visits;
+    } else if (currentView === "month") {
+      historyMonth.records = visits;
     } else {
       historyList.emptyMessage = query
         ? "所选范围内没有匹配的历史记录。"
@@ -92,10 +101,24 @@ async function loadHistory() {
 }
 
 calendar.addEventListener("range-change", event => {
+  if (currentView === "month") {
+    const date = event.detail.startDate;
+    selectedDateLabel.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月`;
+    const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+    if (activeMonthKey === monthKey) {
+      historyMonth.selectedDate = calendar.selectedDate;
+      return;
+    }
+    historyMonth.selectedDate = null;
+    activeMonthKey = monthKey;
+  } else {
+    selectedDateLabel.textContent = rangeLabel(event.detail.startDate, event.detail.endDate);
+  }
   clearTimeout(searchTimer);
-  selectedDateLabel.textContent = rangeLabel(event.detail.startDate, event.detail.endDate);
   loadHistory();
 });
+historyMonth.firstDayOfWeek = calendar.firstDayOfWeek;
+historyMonth.addEventListener("date-select", event => calendar.selectDate(event.detail.date));
 searchInput.addEventListener("input", () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(loadHistory, 250);
@@ -104,14 +127,18 @@ refreshButton.addEventListener("click", loadHistory);
 function selectView(view) {
   if (view === currentView) return;
   currentView = view;
+  activeMonthKey = null;
   content.classList.toggle("is-week-view", view === "week");
+  content.classList.toggle("is-month-view", view === "month");
   listViewButton.setAttribute("aria-pressed", String(view === "list"));
   weekViewButton.setAttribute("aria-pressed", String(view === "week"));
-  calendar.selectionMode = view === "week" ? "week" : "range";
+  monthViewButton.setAttribute("aria-pressed", String(view === "month"));
+  calendar.selectionMode = view === "week" ? "week" : view === "month" ? "month" : "range";
 }
 
 listViewButton.addEventListener("click", () => selectView("list"));
 weekViewButton.addEventListener("click", () => selectView("week"));
+monthViewButton.addEventListener("click", () => selectView("month"));
 toggleCalendarButton.addEventListener("click", () => {
   const hidden = dashboard.classList.toggle("is-calendar-hidden");
   toggleCalendarButton.setAttribute("aria-expanded", String(!hidden));

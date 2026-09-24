@@ -1,34 +1,11 @@
 import { createFavicon } from "./favicon.js";
+import { dayKey, groupDailyRecords, recordDetails, weekdayName } from "./history-records.js";
 
 const template = document.createElement("template");
 template.innerHTML = `
   <p id="status" class="status" role="status">正在加载历史记录…</p>
   <div id="week-grid" class="week-grid" hidden></div>
 `;
-
-const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
-const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false
-});
-
-function dayKey(date) {
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-}
-
-function recordDetails(record, count) {
-  const date = new Date(record.visitTime);
-  const details = [
-    timeFormatter.format(date),
-    `• ${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdayNames[date.getDay()]}`,
-    `• 标题：${record.title || record.url}`,
-    `• 地址：${record.url}`
-  ];
-  if (count > 1) details.push(`• 当天访问次数: ${count}`);
-  return details.join("\n");
-}
 
 class HistoryWeek extends HTMLElement {
   constructor() {
@@ -82,19 +59,12 @@ class HistoryWeek extends HTMLElement {
       column.className = "week-day";
       const heading = document.createElement("h2");
       heading.className = "week-day-heading";
-      heading.textContent = `${date.getMonth() + 1}月${date.getDate()}日 ${weekdayNames[date.getDay()]}`;
+      heading.textContent = `${date.getMonth() + 1}月${date.getDate()}日 ${weekdayName(date)}`;
       const list = document.createElement("div");
       list.className = "week-day-records";
 
       // A compact weekly column shows one entry per URL and badges repeated visits.
-      const grouped = new Map();
-      for (const record of [...records].sort((a, b) => b.visitTime - a.visitTime)) {
-        const existing = grouped.get(record.url);
-        if (existing) existing.count += 1;
-        else grouped.set(record.url, { record, count: 1 });
-      }
-
-      for (const { record, count } of grouped.values()) {
+      for (const { record, count } of groupDailyRecords(records)) {
         const isWebPage = /^https?:\/\//i.test(record.url);
         const item = document.createElement(isWebPage ? "a" : "div");
         item.className = "week-item";
