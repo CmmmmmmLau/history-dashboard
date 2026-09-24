@@ -3,7 +3,7 @@
   "name": "History Dashboard",
   "version": "0.1.0",
   "description": "Quickly view your browsing history and activity.",
-  "permissions": ["history"],
+  "permissions": ["history", "favicon"],
   "action": {
     "default_title": "Open History Dashboard"
   },

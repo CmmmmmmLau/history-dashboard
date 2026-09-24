@@ -42,6 +42,7 @@ class HistoryCalendar extends HTMLElement {
     this._rangeEnd = null;
     this._visibleYear = today.getFullYear();
     this._firstDayOfWeek = getFirstDayOfWeek();
+    this._selectionMode = "range";
 
     const shadow = this.attachShadow({ mode: "open" });
     const stylesheet = document.createElement("link");
@@ -67,6 +68,17 @@ class HistoryCalendar extends HTMLElement {
     };
   }
 
+  set selectionMode(mode) {
+    if (mode !== "range" && mode !== "week") throw new TypeError(`Unsupported calendar selection mode: ${mode}`);
+    if (mode === this._selectionMode) return;
+    this._selectionMode = mode;
+    this._selectDate(this._anchorDate);
+  }
+
+  get selectionMode() {
+    return this._selectionMode;
+  }
+
   connectedCallback() {
     requestAnimationFrame(() => {
       if (this.isConnected) this.shadowRoot.querySelector(".day-button.is-range-start")?.scrollIntoView({ block: "center" });
@@ -86,6 +98,18 @@ class HistoryCalendar extends HTMLElement {
     const today = new Date();
     if (selected > new Date(today.getFullYear(), today.getMonth(), today.getDate())) return;
 
+    if (this._selectionMode === "week") {
+      const offset = (selected.getDay() - this._firstDayOfWeek + 7) % 7;
+      this._anchorDate = selected;
+      this._rangeStart = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate() - offset);
+      this._rangeEnd = new Date(this._rangeStart.getFullYear(), this._rangeStart.getMonth(), this._rangeStart.getDate() + 6);
+      this._visibleYear = selected.getFullYear();
+      this._render();
+      if (preserveFocus) this._focusDate(selected);
+      this._emitRangeChange();
+      return;
+    }
+
     if (extendRange) {
       this._rangeStart = selected < this._anchorDate ? selected : new Date(this._anchorDate);
       this._rangeEnd = selected < this._anchorDate ? new Date(this._anchorDate) : selected;
@@ -102,13 +126,8 @@ class HistoryCalendar extends HTMLElement {
 
   _selectToday() {
     const today = new Date();
-    this._rangeStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    this._anchorDate = new Date(this._rangeStart);
-    this._rangeEnd = null;
-    this._visibleYear = today.getFullYear();
-    this._render();
-    this._dateCell(this._rangeStart)?.scrollIntoView({ block: "center" });
-    this._emitRangeChange();
+    this._selectDate(today);
+    this._dateCell(today)?.scrollIntoView({ block: "center" });
   }
 
   _dateCell(date) {
@@ -150,17 +169,18 @@ class HistoryCalendar extends HTMLElement {
     dayNumber.textContent = date.getDate();
     cell.append(dayNumber);
 
+    const inRange = date >= this._rangeStart && date <= (this._rangeEnd ?? this._rangeStart);
+    if (inRange) cell.classList.add("is-in-range");
+    if (sameDay(date, this._rangeStart)) cell.classList.add("is-range-start");
+    if (this._rangeEnd && sameDay(date, this._rangeEnd)) cell.classList.add("is-range-end");
+
     if (isFuture) {
       cell.disabled = true;
       cell.classList.add("future-day");
     } else {
-      const inRange = date >= this._rangeStart && date <= (this._rangeEnd ?? this._rangeStart);
       cell.dataset.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
       cell.setAttribute("aria-pressed", String(inRange));
       if (sameDay(date, currentDay)) cell.classList.add("is-today");
-      if (inRange) cell.classList.add("is-in-range");
-      if (sameDay(date, this._rangeStart)) cell.classList.add("is-range-start");
-      if (this._rangeEnd && sameDay(date, this._rangeEnd)) cell.classList.add("is-range-end");
       cell.addEventListener("click", event => this._selectDate(date, event.shiftKey, event.detail === 0));
       cell.addEventListener("keydown", event => {
         if (event.shiftKey && (event.key === "Enter" || event.key === " ")) {

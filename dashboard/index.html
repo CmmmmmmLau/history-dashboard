@@ -23,11 +23,16 @@
             <span id="count" aria-live="polite"></span>
           </div>
           <div class="actions">
+            <div class="view-switcher" role="group" aria-label="历史记录视图">
+              <button id="list-view" type="button" aria-pressed="true">列表</button>
+              <button id="week-view" type="button" aria-pressed="false">周视图</button>
+            </div>
             <button id="refresh" type="button" aria-label="刷新" title="刷新"></button>
           </div>
         </header>
 
         <history-list></history-list>
+        <history-week></history-week>
       </section>
     </main>
   </body>

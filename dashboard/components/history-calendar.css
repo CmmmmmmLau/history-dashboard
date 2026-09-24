@@ -30,6 +30,7 @@ button:focus-visible { outline: 2px solid #3274c6; outline-offset: -2px; }
 .day-button.is-in-range { background: #fff9e8; }
 .day-button.is-range-start, .day-button.is-range-end,
 .day-button.is-range-start:hover, .day-button.is-range-end:hover { background: #fff0bb; color: #342900; font-weight: 700; }
+.day-button.future-day.is-in-range { background: #f5f6f7; color: #aab4bf; font-weight: 400; }
 .month-label { display: block; margin-top: 2px; color: #4d5d70; font-size: 11px; font-weight: 700; line-height: 1; white-space: nowrap; }
 
 @media (max-width: 560px) {
