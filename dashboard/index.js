@@ -20,6 +20,8 @@ const historyList = document.querySelector("history-list");
 const historyWeek = document.querySelector("history-week");
 const historyMonth = document.querySelector("history-month");
 
+const VIEW_STORAGE_KEY = "history-dashboard:view";
+const CALENDAR_HIDDEN_STORAGE_KEY = "history-dashboard:calendar-hidden";
 const weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 let requestId = 0;
 let searchTimer;
@@ -141,6 +143,7 @@ nextRangeButton.addEventListener("click", () => calendar.shiftSelection(1));
 function selectView(view) {
   if (view === currentView) return;
   currentView = view;
+  localStorage.setItem(VIEW_STORAGE_KEY, view);
   activeMonthKey = null;
   content.classList.toggle("is-week-view", view === "week");
   content.classList.toggle("is-month-view", view === "month");
@@ -153,13 +156,25 @@ function selectView(view) {
 listViewButton.addEventListener("click", () => selectView("list"));
 weekViewButton.addEventListener("click", () => selectView("week"));
 monthViewButton.addEventListener("click", () => selectView("month"));
-toggleCalendarButton.addEventListener("click", () => {
-  const hidden = dashboard.classList.toggle("is-calendar-hidden");
+function setCalendarHidden(hidden) {
+  dashboard.classList.toggle("is-calendar-hidden", hidden);
   toggleCalendarButton.setAttribute("aria-expanded", String(!hidden));
   toggleCalendarButton.setAttribute("aria-label", hidden ? "显示日历" : "隐藏日历");
   toggleCalendarButton.title = hidden ? "显示日历" : "隐藏日历";
+}
+
+toggleCalendarButton.addEventListener("click", () => {
+  const hidden = !dashboard.classList.contains("is-calendar-hidden");
+  setCalendarHidden(hidden);
+  localStorage.setItem(CALENDAR_HIDDEN_STORAGE_KEY, String(hidden));
 });
 
-selectedDateLabel.textContent = rangeLabel(calendar.selectedRange.startDate, calendar.selectedRange.endDate);
-updateRangeNavigation();
-loadHistory();
+setCalendarHidden(localStorage.getItem(CALENDAR_HIDDEN_STORAGE_KEY) === "true");
+const savedView = localStorage.getItem(VIEW_STORAGE_KEY);
+if (savedView === "week" || savedView === "month") {
+  selectView(savedView);
+} else {
+  selectedDateLabel.textContent = rangeLabel(calendar.selectedRange.startDate, calendar.selectedRange.endDate);
+  updateRangeNavigation();
+  loadHistory();
+}
