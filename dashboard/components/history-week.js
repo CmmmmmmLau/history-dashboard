@@ -1,3 +1,5 @@
+import { createFavicon } from "./favicon.js";
+
 const template = document.createElement("template");
 template.innerHTML = `
   <p id="status" class="status" role="status">正在加载历史记录…</p>
@@ -8,13 +10,6 @@ const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星�
 
 function dayKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-}
-
-function faviconURL(pageUrl) {
-  const url = new URL(chrome.runtime.getURL("/_favicon/"));
-  url.searchParams.set("pageUrl", pageUrl);
-  url.searchParams.set("size", "16");
-  return url.toString();
 }
 
 class HistoryWeek extends HTMLElement {
@@ -90,14 +85,7 @@ class HistoryWeek extends HTMLElement {
           item.target = "_blank";
           item.rel = "noopener noreferrer";
         }
-        const icon = document.createElement("img");
-        icon.className = "site-icon";
-        icon.src = faviconURL(record.url);
-        icon.alt = "";
-        icon.width = 16;
-        icon.height = 16;
-        icon.loading = "lazy";
-        icon.addEventListener("error", () => icon.remove(), { once: true });
+        const icon = createFavicon(record.url);
         const title = document.createElement("span");
         title.className = "week-item-title";
         title.textContent = record.title || record.url;

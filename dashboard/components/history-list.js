@@ -1,3 +1,5 @@
+import { createFavicon } from "./favicon.js";
+
 const template = document.createElement("template");
 template.innerHTML = `
   <div class="list-header">
@@ -120,8 +122,11 @@ class HistoryList extends HTMLElement {
       time.textContent = timeFormatter.format(visitDate);
       const title = document.createElement("span");
       title.className = "history-title";
-      title.textContent = record.title || record.url;
       title.title = record.title || record.url;
+      const titleText = document.createElement("span");
+      titleText.className = "history-title-text";
+      titleText.textContent = record.title || record.url;
+      title.append(createFavicon(record.url), titleText);
       const url = document.createElement("span");
       url.className = "history-url";
       url.textContent = record.url;
