@@ -166,6 +166,7 @@ function setCalendarHidden(hidden) {
 toggleCalendarButton.addEventListener("click", () => {
   const hidden = !dashboard.classList.contains("is-calendar-hidden");
   setCalendarHidden(hidden);
+  if (!hidden) calendar.ensureSelectionVisible();
   localStorage.setItem(CALENDAR_HIDDEN_STORAGE_KEY, String(hidden));
 });
 

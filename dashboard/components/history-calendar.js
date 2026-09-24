@@ -48,6 +48,7 @@ class HistoryCalendar extends HTMLElement {
     const stylesheet = document.createElement("link");
     stylesheet.rel = "stylesheet";
     stylesheet.href = new URL("./history-calendar.css", import.meta.url).href;
+    stylesheet.addEventListener("load", () => this.ensureSelectionVisible());
     shadow.append(stylesheet, template.content.cloneNode(true));
 
     shadow.querySelector("#previous-year").addEventListener("click", () => this._shiftYear(-1));
@@ -85,6 +86,19 @@ class HistoryCalendar extends HTMLElement {
     this._selectDate(date);
   }
 
+  ensureSelectionVisible() {
+    if (!this.isConnected || !this.clientHeight) return;
+    const selected = this._dateCell(this._anchorDate);
+    if (!selected) return;
+
+    const viewportTop = this._weekdays.getBoundingClientRect().bottom;
+    const viewportBottom = this.getBoundingClientRect().bottom;
+    const cell = selected.getBoundingClientRect();
+    if (cell.top < viewportTop || cell.bottom > viewportBottom) {
+      this.scrollTop += (cell.top + cell.bottom - viewportTop - viewportBottom) / 2;
+    }
+  }
+
   shiftSelection(direction) {
     if (direction !== -1 && direction !== 1) throw new TypeError("Direction must be -1 or 1");
     if (direction === 1 && !this.canMoveNext) return;
@@ -102,6 +116,7 @@ class HistoryCalendar extends HTMLElement {
       this._render();
       this._emitRangeChange();
     }
+    this.ensureSelectionVisible();
   }
 
   set selectionMode(mode) {
@@ -117,7 +132,7 @@ class HistoryCalendar extends HTMLElement {
 
   connectedCallback() {
     requestAnimationFrame(() => {
-      if (this.isConnected) this.shadowRoot.querySelector(".day-button.is-range-start")?.scrollIntoView({ block: "center" });
+      this.ensureSelectionVisible();
     });
   }
 
@@ -174,7 +189,7 @@ class HistoryCalendar extends HTMLElement {
   _selectToday() {
     const today = new Date();
     this._selectDate(today);
-    this._dateCell(today)?.scrollIntoView({ block: "center" });
+    this.ensureSelectionVisible();
   }
 
   _dateCell(date) {
