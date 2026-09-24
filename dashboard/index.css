@@ -29,6 +29,8 @@ h1 { overflow: hidden; margin: 0; font-size: 15px; font-weight: 700; text-overfl
 .actions { display: flex; align-items: center; justify-self: end; gap: 8px; }
 .actions button { height: 30px; padding: 0 11px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; color: #4b5663; font-size: 12px; }
 .actions button:hover { background: #f4f6f8; }
+#refresh { display: grid; place-items: center; width: 30px; padding: 0; }
+#refresh::before { content: ""; width: 18px; height: 18px; background: currentColor; -webkit-mask: url("./assets/system-uicons--refresh.svg") center / contain no-repeat; mask: url("./assets/system-uicons--refresh.svg") center / contain no-repeat; }
 @media (max-width: 800px) {
   .dashboard { grid-template-columns: 252px minmax(0, 1fr); }
   .content-toolbar { grid-template-columns: minmax(0, 1fr) auto auto; }
