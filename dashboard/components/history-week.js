@@ -7,9 +7,27 @@ template.innerHTML = `
 `;
 
 const weekdayNames = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+});
 
 function dayKey(date) {
   return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+}
+
+function recordDetails(record, count) {
+  const date = new Date(record.visitTime);
+  const details = [
+    timeFormatter.format(date),
+    `• ${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdayNames[date.getDay()]}`,
+    `• 标题：${record.title || record.url}`,
+    `• 地址：${record.url}`
+  ];
+  if (count > 1) details.push(`• 当天访问次数: ${count}`);
+  return details.join("\n");
 }
 
 class HistoryWeek extends HTMLElement {
@@ -80,6 +98,7 @@ class HistoryWeek extends HTMLElement {
         const isWebPage = /^https?:\/\//i.test(record.url);
         const item = document.createElement(isWebPage ? "a" : "div");
         item.className = "week-item";
+        item.title = recordDetails(record, count);
         if (isWebPage) {
           item.href = record.url;
           item.target = "_blank";
@@ -89,7 +108,6 @@ class HistoryWeek extends HTMLElement {
         const title = document.createElement("span");
         title.className = "week-item-title";
         title.textContent = record.title || record.url;
-        title.title = record.title || record.url;
         item.append(icon, title);
         if (count > 1) {
           const badge = document.createElement("span");
