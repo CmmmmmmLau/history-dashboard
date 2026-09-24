@@ -13,13 +13,15 @@
 
       <section class="content" aria-label="所选日期范围的历史记录">
         <header class="content-toolbar">
+          <div class="search-area">
+            <label class="sr-only" for="search">搜索所选范围的记录</label>
+            <input id="search" type="search" placeholder="搜索所选范围的标题或网址" autocomplete="off" />
+          </div>
           <div class="heading">
             <h1 id="selected-date"></h1>
             <span id="count" aria-live="polite"></span>
           </div>
-          <div class="tools">
-            <label class="sr-only" for="search">搜索所选范围的记录</label>
-            <input id="search" type="search" placeholder="搜索所选范围的标题或网址" autocomplete="off" />
+          <div class="actions">
             <button id="refresh" type="button">刷新</button>
           </div>
         </header>
