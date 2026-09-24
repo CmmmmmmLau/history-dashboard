@@ -1,3 +1,5 @@
+import { getFirstDayOfWeek } from "../preferences.js";
+
 const template = document.createElement("template");
 template.innerHTML = `
   <div class="calendar-toolbar">
@@ -13,17 +15,6 @@ template.innerHTML = `
 `;
 
 const weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-
-function getFirstDayOfWeek() {
-  try {
-    const locale = new Intl.Locale(chrome.i18n.getUILanguage());
-    const firstDay = (locale.getWeekInfo?.() ?? locale.weekInfo)?.firstDay;
-    if (Number.isInteger(firstDay) && firstDay >= 1 && firstDay <= 7) return firstDay % 7;
-  } catch (error) {
-    console.warn("Unable to determine the locale's first day of week:", error);
-  }
-  return 1;
-}
 
 function sameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -80,6 +71,16 @@ class HistoryCalendar extends HTMLElement {
 
   get firstDayOfWeek() {
     return this._firstDayOfWeek;
+  }
+
+  refreshFirstDayOfWeek() {
+    const firstDay = getFirstDayOfWeek();
+    if (firstDay === this._firstDayOfWeek) return;
+    this._firstDayOfWeek = firstDay;
+    this._renderWeekdays();
+    if (this._selectionMode === "week") this._selectDate(this._anchorDate);
+    else this._render();
+    this.ensureSelectionVisible();
   }
 
   selectDate(date) {

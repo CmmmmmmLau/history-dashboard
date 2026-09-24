@@ -9,5 +9,9 @@
   },
   "background": {
     "service_worker": "worker.js"
+  },
+  "options_ui": {
+    "page": "dashboard/settings/index.html",
+    "open_in_tab": true
   }
 }

@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #26313e;
+  background: #f7f9fb;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+.settings { max-width: 640px; margin: 48px auto; padding: 0 24px; }
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+h1 { margin: 0; font-size: 24px; }
+header a { color: #2561aa; font-size: 13px; text-decoration: none; }
+header a:hover { text-decoration: underline; }
+section { padding: 24px; border: 1px solid #e2e6ea; border-radius: 8px; background: #fff; }
+h2 { margin: 0 0 24px; font-size: 16px; }
+label { display: block; font-size: 14px; font-weight: 600; }
+p { margin: 6px 0 12px; color: #68717c; font-size: 13px; }
+select { width: 100%; max-width: 300px; height: 36px; padding: 0 10px; border: 1px solid #d9dfe5; border-radius: 5px; background: #fff; color: inherit; font: inherit; font-size: 13px; }
+select:focus-visible, a:focus-visible { outline: 2px solid #3274c6; outline-offset: 2px; }
+#save-status { min-height: 18px; margin-bottom: 0; color: #2561aa; }
+
+@media (max-width: 560px) {
+  .settings { margin: 24px auto; padding: 0 16px; }
+}

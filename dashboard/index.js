@@ -2,6 +2,7 @@ import "./components/history-calendar.js";
 import "./components/history-list.js";
 import "./components/history-week.js";
 import "./components/history-month.js";
+import { FIRST_DAY_OF_WEEK_KEY } from "./preferences.js";
 
 const calendar = document.querySelector("history-calendar");
 const dashboard = document.querySelector(".dashboard");
@@ -15,6 +16,7 @@ const nextRangeButton = document.querySelector("#next-range");
 const selectedDateLabel = document.querySelector("#selected-date");
 const searchInput = document.querySelector("#search");
 const refreshButton = document.querySelector("#refresh");
+const settingsButton = document.querySelector("#settings");
 const count = document.querySelector("#count");
 const historyList = document.querySelector("history-list");
 const historyWeek = document.querySelector("history-week");
@@ -138,6 +140,7 @@ searchInput.addEventListener("input", () => {
   searchTimer = setTimeout(loadHistory, 250);
 });
 refreshButton.addEventListener("click", loadHistory);
+settingsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 previousRangeButton.addEventListener("click", () => calendar.shiftSelection(-1));
 nextRangeButton.addEventListener("click", () => calendar.shiftSelection(1));
 function selectView(view) {
@@ -168,6 +171,12 @@ toggleCalendarButton.addEventListener("click", () => {
   setCalendarHidden(hidden);
   if (!hidden) calendar.ensureSelectionVisible();
   localStorage.setItem(CALENDAR_HIDDEN_STORAGE_KEY, String(hidden));
+});
+
+window.addEventListener("storage", event => {
+  if (event.key !== FIRST_DAY_OF_WEEK_KEY) return;
+  calendar.refreshFirstDayOfWeek();
+  historyMonth.firstDayOfWeek = calendar.firstDayOfWeek;
 });
 
 setCalendarHidden(localStorage.getItem(CALENDAR_HIDDEN_STORAGE_KEY) === "true");
