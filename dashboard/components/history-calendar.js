@@ -1,30 +1,16 @@
+import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
 import { getFirstDayOfWeek } from "../preferences.js";
 
-const template = document.createElement("template");
-template.innerHTML = `
-  <div class="calendar-toolbar">
-    <div class="year-navigation">
-      <button id="previous-year" type="button" aria-label="上一年">‹</button>
-      <strong id="visible-year"></strong>
-      <button id="next-year" type="button" aria-label="下一年">›</button>
-    </div>
-    <button id="today" type="button">今天</button>
-  </div>
-  <div class="weekdays" aria-hidden="true"></div>
-  <div id="days" class="days"></div>
-`;
+class HistoryCalendar extends LitElement {
+  static properties = {
+    _rangeStart: { state: true },
+    _rangeEnd: { state: true },
+    _anchorDate: { state: true },
+    _visibleYear: { state: true },
+    _firstDayOfWeek: { state: true },
+    _selectionMode: { state: true }
+  };
 
-const weekdayNames = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
-
-function sameDay(a, b) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function dateLabel(date) {
-  return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekdayNames[date.getDay()]}`;
-}
-
-class HistoryCalendar extends HTMLElement {
   constructor() {
     super();
     const today = new Date();
@@ -34,23 +20,6 @@ class HistoryCalendar extends HTMLElement {
     this._visibleYear = today.getFullYear();
     this._firstDayOfWeek = getFirstDayOfWeek();
     this._selectionMode = "range";
-
-    const shadow = this.attachShadow({ mode: "open" });
-    const stylesheet = document.createElement("link");
-    stylesheet.rel = "stylesheet";
-    stylesheet.href = new URL("./history-calendar.css", import.meta.url).href;
-    stylesheet.addEventListener("load", () => this.ensureSelectionVisible());
-    shadow.append(stylesheet, template.content.cloneNode(true));
-
-    shadow.querySelector("#previous-year").addEventListener("click", () => this._shiftYear(-1));
-    shadow.querySelector("#next-year").addEventListener("click", () => this._shiftYear(1));
-    shadow.querySelector("#today").addEventListener("click", () => this._selectToday());
-    this._yearLabel = shadow.querySelector("#visible-year");
-    this._nextYearButton = shadow.querySelector("#next-year");
-    this._weekdays = shadow.querySelector(".weekdays");
-    this._days = shadow.querySelector("#days");
-    this._renderWeekdays();
-    this._render();
   }
 
   get selectedRange() {
@@ -73,13 +42,27 @@ class HistoryCalendar extends HTMLElement {
     return this._firstDayOfWeek;
   }
 
+  get selectionMode() {
+    return this._selectionMode;
+  }
+
+  set selectionMode(mode) {
+    if (mode !== "range" && mode !== "week" && mode !== "month") throw new TypeError(`Unsupported calendar selection mode: ${mode}`);
+    if (mode === this._selectionMode) return;
+    this._selectionMode = mode;
+    this._selectDate(this._anchorDate);
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this.updateComplete.then(() => requestAnimationFrame(() => this.ensureSelectionVisible()));
+  }
+
   refreshFirstDayOfWeek() {
     const firstDay = getFirstDayOfWeek();
     if (firstDay === this._firstDayOfWeek) return;
     this._firstDayOfWeek = firstDay;
-    this._renderWeekdays();
     if (this._selectionMode === "week") this._selectDate(this._anchorDate);
-    else this._render();
     this.ensureSelectionVisible();
   }
 
@@ -87,12 +70,13 @@ class HistoryCalendar extends HTMLElement {
     this._selectDate(date);
   }
 
-  ensureSelectionVisible() {
+  async ensureSelectionVisible() {
+    await this.updateComplete;
     if (!this.isConnected || !this.clientHeight) return;
     const selected = this._dateCell(this._anchorDate);
-    if (!selected) return;
-
-    const viewportTop = this._weekdays.getBoundingClientRect().bottom;
+    const weekdays = this.renderRoot.querySelector(".weekdays");
+    if (!selected || !weekdays) return;
+    const viewportTop = weekdays.getBoundingClientRect().bottom;
     const viewportBottom = this.getBoundingClientRect().bottom;
     const cell = selected.getBoundingClientRect();
     if (cell.top < viewportTop || cell.bottom > viewportBottom) {
@@ -114,35 +98,28 @@ class HistoryCalendar extends HTMLElement {
       if (this._rangeEnd) this._rangeEnd = shiftDay(this._rangeEnd);
       this._anchorDate = shiftDay(this._anchorDate);
       this._visibleYear = this._anchorDate.getFullYear();
-      this._render();
       this._emitRangeChange();
     }
     this.ensureSelectionVisible();
   }
 
-  set selectionMode(mode) {
-    if (mode !== "range" && mode !== "week" && mode !== "month") throw new TypeError(`Unsupported calendar selection mode: ${mode}`);
-    if (mode === this._selectionMode) return;
-    this._selectionMode = mode;
-    this._selectDate(this._anchorDate);
+  _sameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
   }
 
-  get selectionMode() {
-    return this._selectionMode;
+  _dayKey(date) {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   }
 
-  connectedCallback() {
-    requestAnimationFrame(() => {
-      this.ensureSelectionVisible();
-    });
+  _dateLabel(date) {
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${["周日", "周一", "周二", "周三", "周四", "周五", "周六"][date.getDay()]}`;
   }
 
   _shiftYear(offset) {
     const targetYear = this._visibleYear + offset;
     if (targetYear > new Date().getFullYear()) return;
     this._visibleYear = targetYear;
-    this._render();
-    this.scrollTop = 0;
+    this.updateComplete.then(() => { this.scrollTop = 0; });
   }
 
   _selectDate(date, extendRange = false, preserveFocus = false) {
@@ -154,26 +131,12 @@ class HistoryCalendar extends HTMLElement {
       this._anchorDate = selected;
       this._rangeStart = new Date(selected.getFullYear(), selected.getMonth(), 1);
       this._rangeEnd = new Date(selected.getFullYear(), selected.getMonth() + 1, 0);
-      this._visibleYear = selected.getFullYear();
-      this._render();
-      if (preserveFocus) this._focusDate(selected);
-      this._emitRangeChange();
-      return;
-    }
-
-    if (this._selectionMode === "week") {
+    } else if (this._selectionMode === "week") {
       const offset = (selected.getDay() - this._firstDayOfWeek + 7) % 7;
       this._anchorDate = selected;
       this._rangeStart = new Date(selected.getFullYear(), selected.getMonth(), selected.getDate() - offset);
       this._rangeEnd = new Date(this._rangeStart.getFullYear(), this._rangeStart.getMonth(), this._rangeStart.getDate() + 6);
-      this._visibleYear = selected.getFullYear();
-      this._render();
-      if (preserveFocus) this._focusDate(selected);
-      this._emitRangeChange();
-      return;
-    }
-
-    if (extendRange) {
+    } else if (extendRange) {
       this._rangeStart = selected < this._anchorDate ? selected : new Date(this._anchorDate);
       this._rangeEnd = selected < this._anchorDate ? new Date(this._anchorDate) : selected;
     } else {
@@ -182,24 +145,17 @@ class HistoryCalendar extends HTMLElement {
       this._rangeEnd = null;
     }
     this._visibleYear = selected.getFullYear();
-    this._render();
-    if (preserveFocus) this._focusDate(selected);
+    if (preserveFocus) this.updateComplete.then(() => this._dateCell(selected)?.focus());
     this._emitRangeChange();
   }
 
   _selectToday() {
-    const today = new Date();
-    this._selectDate(today);
+    this._selectDate(new Date());
     this.ensureSelectionVisible();
   }
 
   _dateCell(date) {
-    const key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    return this._days.querySelector(`[data-date="${key}"]`);
-  }
-
-  _focusDate(date) {
-    this._dateCell(date)?.focus();
+    return this.renderRoot.querySelector(`[data-date="${this._dayKey(date)}"]`);
   }
 
   _emitRangeChange() {
@@ -210,78 +166,64 @@ class HistoryCalendar extends HTMLElement {
     }));
   }
 
-  _renderWeekdays() {
-    const fragment = document.createDocumentFragment();
-    for (let offset = 0; offset < 7; offset += 1) {
-      const label = document.createElement("span");
-      label.textContent = weekdayNames[(this._firstDayOfWeek + offset) % 7];
-      fragment.append(label);
-    }
-    this._weekdays.replaceChildren(fragment);
-  }
-
-  _createDay(date, currentDay) {
+  _renderDay(date, currentDay) {
     const isFuture = date > currentDay;
-    const cell = document.createElement("button");
-    cell.type = "button";
-    cell.className = "day-button";
-    if (date.getMonth() % 2 === 1) cell.classList.add("striped-month");
-    cell.setAttribute("aria-label", dateLabel(date));
-
-    const dayNumber = document.createElement("span");
-    dayNumber.textContent = date.getDate();
-    cell.append(dayNumber);
-
     const inRange = date >= this._rangeStart && date <= (this._rangeEnd ?? this._rangeStart);
-    if (inRange) cell.classList.add("is-in-range");
-    if (sameDay(date, this._rangeStart)) cell.classList.add("is-range-start");
-    if (this._rangeEnd && sameDay(date, this._rangeEnd)) cell.classList.add("is-range-end");
-
-    if (isFuture) {
-      cell.disabled = true;
-      cell.classList.add("future-day");
-    } else {
-      cell.dataset.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-      cell.setAttribute("aria-pressed", String(inRange));
-      if (sameDay(date, currentDay)) cell.classList.add("is-today");
-      cell.addEventListener("click", event => this._selectDate(date, event.shiftKey, event.detail === 0));
-      cell.addEventListener("keydown", event => {
-        if (event.shiftKey && (event.key === "Enter" || event.key === " ")) {
-          event.preventDefault();
-          this._selectDate(date, true, true);
-        }
-      });
-    }
-
-    if (date.getDate() === 1) {
-      const monthLabel = document.createElement("small");
-      monthLabel.className = "month-label";
-      monthLabel.textContent = `${date.getMonth() + 1}月`;
-      cell.append(monthLabel);
-    }
-    return cell;
+    const className = [
+      "day-button",
+      date.getMonth() % 2 ? "striped-month" : "",
+      inRange ? "is-in-range" : "",
+      this._sameDay(date, this._rangeStart) ? "is-range-start" : "",
+      this._rangeEnd && this._sameDay(date, this._rangeEnd) ? "is-range-end" : "",
+      isFuture ? "future-day" : "",
+      this._sameDay(date, currentDay) ? "is-today" : ""
+    ].filter(Boolean).join(" ");
+    return html`
+      <button type="button" class=${className} aria-label=${this._dateLabel(date)}
+        ?disabled=${isFuture} data-date=${isFuture ? nothing : this._dayKey(date)}
+        aria-pressed=${isFuture ? nothing : String(inRange)}
+        @click=${event => this._selectDate(date, event.shiftKey, event.detail === 0)}
+        @keydown=${event => {
+          if (event.shiftKey && (event.key === "Enter" || event.key === " ")) {
+            event.preventDefault();
+            this._selectDate(date, true, true);
+          }
+        }}>
+        <span>${date.getDate()}</span>
+        ${date.getDate() === 1 ? html`<small class="month-label">${date.getMonth() + 1}月</small>` : nothing}
+      </button>
+    `;
   }
 
-  _render() {
-    this._yearLabel.textContent = `${this._visibleYear}年`;
-    this._nextYearButton.disabled = this._visibleYear >= new Date().getFullYear();
-    const fragment = document.createDocumentFragment();
+  render() {
     const firstWeekday = (new Date(this._visibleYear, 0, 1).getDay() - this._firstDayOfWeek + 7) % 7;
-    for (let cell = 0; cell < firstWeekday; cell += 1) {
-      const empty = document.createElement("span");
-      empty.className = "empty-day";
-      fragment.append(empty);
-    }
-
-    const today = new Date();
-    const currentDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const dates = [];
     for (let month = 0; month < 12; month += 1) {
       const daysInMonth = new Date(this._visibleYear, month + 1, 0).getDate();
-      for (let day = 1; day <= daysInMonth; day += 1) {
-        fragment.append(this._createDay(new Date(this._visibleYear, month, day), currentDay));
-      }
+      for (let day = 1; day <= daysInMonth; day += 1) dates.push(new Date(this._visibleYear, month, day));
     }
-    this._days.replaceChildren(fragment);
+    const today = new Date();
+    const currentDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    return html`
+      <link rel="stylesheet" href=${new URL("./history-calendar.css", import.meta.url).href}
+        @load=${() => this.ensureSelectionVisible()}>
+      <div class="calendar-toolbar">
+        <div class="year-navigation">
+          <button id="previous-year" type="button" aria-label="上一年" @click=${() => this._shiftYear(-1)}>‹</button>
+          <strong id="visible-year">${this._visibleYear}年</strong>
+          <button id="next-year" type="button" aria-label="下一年"
+            ?disabled=${this._visibleYear >= today.getFullYear()} @click=${() => this._shiftYear(1)}>›</button>
+        </div>
+        <button id="today" type="button" @click=${this._selectToday}>今天</button>
+      </div>
+      <div class="weekdays" aria-hidden="true">
+        ${Array.from({ length: 7 }, (_, offset) => html`<span>${["周日", "周一", "周二", "周三", "周四", "周五", "周六"][(this._firstDayOfWeek + offset) % 7]}</span>`)}
+      </div>
+      <div id="days" class="days">
+        ${Array.from({ length: firstWeekday }, () => html`<span class="empty-day"></span>`)}
+        ${repeat(dates, date => this._dayKey(date), date => this._renderDay(date, currentDay))}
+      </div>
+    `;
   }
 }
 

@@ -1,101 +1,106 @@
-import { createFavicon } from "./favicon.js";
-import { dayKey, groupDailyRecords, recordDetails, weekdayName } from "./history-records.js";
+import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
+import "./history-favicon.js";
 
-const template = document.createElement("template");
-template.innerHTML = `
-  <p id="status" class="status" role="status">正在加载历史记录…</p>
-  <div id="week-grid" class="week-grid" hidden></div>
-`;
+class HistoryWeek extends LitElement {
+  static properties = {
+    _weekStart: { state: true },
+    _records: { state: true },
+    _statusMessage: { state: true }
+  };
 
-class HistoryWeek extends HTMLElement {
   constructor() {
     super();
     this._weekStart = new Date();
     this._records = null;
-
-    const shadow = this.attachShadow({ mode: "open" });
-    const stylesheet = document.createElement("link");
-    stylesheet.rel = "stylesheet";
-    stylesheet.href = new URL("./history-week.css", import.meta.url).href;
-    shadow.append(stylesheet, template.content.cloneNode(true));
-
-    this._status = shadow.querySelector("#status");
-    this._grid = shadow.querySelector("#week-grid");
+    this._statusMessage = "正在加载历史记录…";
+    this._timeFormatter = new Intl.DateTimeFormat("zh-CN", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    });
   }
 
   set weekStart(date) {
     this._weekStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    if (this._records !== null) this._render();
   }
 
   set records(records) {
     this._records = [...records];
-    this._render();
   }
 
   showStatus(message) {
     this._records = null;
-    this._grid.replaceChildren();
-    this._grid.hidden = true;
-    this._status.textContent = message;
-    this._status.hidden = false;
+    this._statusMessage = message;
   }
 
-  _render() {
-    const byDay = new Map();
-    for (let offset = 0; offset < 7; offset += 1) {
-      const date = new Date(this._weekStart.getFullYear(), this._weekStart.getMonth(), this._weekStart.getDate() + offset);
-      byDay.set(dayKey(date), { date, records: [] });
+  _dayKey(date) {
+    return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+  }
+
+  _weekdayName(date) {
+    return ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"][date.getDay()];
+  }
+
+  _groupDailyRecords(records) {
+    const grouped = new Map();
+    for (const record of [...records].sort((a, b) => b.visitTime - a.visitTime)) {
+      const existing = grouped.get(record.url);
+      if (existing) existing.count += 1;
+      else grouped.set(record.url, { record, count: 1 });
     }
+    return [...grouped.values()];
+  }
 
-    for (const record of this._records) {
-      const date = new Date(record.visitTime);
-      byDay.get(dayKey(date))?.records.push(record);
-    }
+  _recordDetails(record, count) {
+    const date = new Date(record.visitTime);
+    const details = [
+      this._timeFormatter.format(date),
+      `• ${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${this._weekdayName(date)}`,
+      `• 标题：${record.title || record.url}`,
+      `• 地址：${record.url}`
+    ];
+    if (count > 1) details.push(`• 当天访问次数: ${count}`);
+    return details.join("\n");
+  }
 
-    const fragment = document.createDocumentFragment();
-    for (const { date, records } of byDay.values()) {
-      const column = document.createElement("section");
-      column.className = "week-day";
-      const heading = document.createElement("h2");
-      heading.className = "week-day-heading";
-      heading.textContent = `${date.getMonth() + 1}月${date.getDate()}日 ${weekdayName(date)}`;
-      const list = document.createElement("div");
-      list.className = "week-day-records";
+  _renderItem({ record, count }) {
+    const content = html`
+      <history-favicon class="site-icon" .pageUrl=${record.url}></history-favicon>
+      <span class="week-item-title">${record.title || record.url}</span>
+      ${count > 1 ? html`<span class="visit-count" aria-label=${`${count} 次访问`}>${count}</span>` : nothing}
+    `;
+    const title = this._recordDetails(record, count);
+    return /^https?:\/\//i.test(record.url)
+      ? html`<a class="week-item" title=${title} href=${record.url} target="_blank" rel="noopener noreferrer">${content}</a>`
+      : html`<div class="week-item" title=${title}>${content}</div>`;
+  }
 
-      // A compact weekly column shows one entry per URL and badges repeated visits.
-      for (const { record, count } of groupDailyRecords(records)) {
-        const isWebPage = /^https?:\/\//i.test(record.url);
-        const item = document.createElement(isWebPage ? "a" : "div");
-        item.className = "week-item";
-        item.title = recordDetails(record, count);
-        if (isWebPage) {
-          item.href = record.url;
-          item.target = "_blank";
-          item.rel = "noopener noreferrer";
-        }
-        const icon = createFavicon(record.url);
-        const title = document.createElement("span");
-        title.className = "week-item-title";
-        title.textContent = record.title || record.url;
-        item.append(icon, title);
-        if (count > 1) {
-          const badge = document.createElement("span");
-          badge.className = "visit-count";
-          badge.textContent = String(count);
-          badge.setAttribute("aria-label", `${count} 次访问`);
-          item.append(badge);
-        }
-        list.append(item);
+  _renderDay({ date, records }) {
+    return html`
+      <section class="week-day">
+        <h2 class="week-day-heading">${date.getMonth() + 1}月${date.getDate()}日 ${this._weekdayName(date)}</h2>
+        <div class="week-day-records">${repeat(this._groupDailyRecords(records), item => item.record.url, item => this._renderItem(item))}</div>
+      </section>
+    `;
+  }
+
+  render() {
+    const days = new Map();
+    if (this._records !== null) {
+      for (let offset = 0; offset < 7; offset += 1) {
+        const date = new Date(this._weekStart.getFullYear(), this._weekStart.getMonth(), this._weekStart.getDate() + offset);
+        days.set(this._dayKey(date), { date, records: [] });
       }
-
-      column.append(heading, list);
-      fragment.append(column);
+      for (const record of this._records) {
+        const date = new Date(record.visitTime);
+        days.get(this._dayKey(date))?.records.push(record);
+      }
     }
-
-    this._grid.replaceChildren(fragment);
-    this._grid.hidden = false;
-    this._status.hidden = true;
+    return html`
+      <link rel="stylesheet" href=${new URL("./history-week.css", import.meta.url).href}>
+      <p id="status" class="status" role="status" ?hidden=${this._records !== null}>${this._statusMessage}</p>
+      <div id="week-grid" class="week-grid" ?hidden=${this._records === null}>
+        ${repeat([...days.values()], day => this._dayKey(day.date), day => this._renderDay(day))}
+      </div>
+    `;
   }
 }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>History Dashboard</title>
+    <link rel="stylesheet" href="theme.css" />
     <link rel="stylesheet" href="index.css" />
     <script src="index.js" type="module"></script>
   </head>
@@ -12,30 +13,7 @@
       <history-calendar id="calendar" role="complementary" aria-label="选择日期范围"></history-calendar>
 
       <section class="content" aria-label="所选日期范围的历史记录">
-        <header class="content-toolbar">
-          <div class="search-area">
-            <button id="toggle-calendar" type="button" aria-controls="calendar" aria-expanded="true" aria-label="隐藏日历" title="隐藏日历"></button>
-            <label class="sr-only" for="search">搜索所选范围的记录</label>
-            <input id="search" type="search" placeholder="搜索所选范围的标题或网址" autocomplete="off" />
-          </div>
-          <div class="heading">
-            <h1 id="selected-date"></h1>
-            <span id="count" aria-live="polite"></span>
-          </div>
-          <div class="actions">
-            <div class="range-navigation">
-              <button id="previous-range" type="button" aria-label="上一日" title="上一日"></button>
-              <button id="next-range" type="button" aria-label="下一日" title="下一日" disabled></button>
-              <div class="view-switcher" role="group" aria-label="历史记录视图">
-                <button id="list-view" type="button" aria-pressed="true" aria-label="日视图" title="日视图">日</button>
-                <button id="week-view" type="button" aria-pressed="false" aria-label="周视图" title="周视图">周</button>
-                <button id="month-view" type="button" aria-pressed="false" aria-label="月视图" title="月视图">月</button>
-              </div>
-            </div>
-            <button id="refresh" type="button" aria-label="刷新" title="刷新"></button>
-            <button id="settings" type="button">设置</button>
-          </div>
-        </header>
+        <history-toolbar></history-toolbar>
 
         <history-list></history-list>
         <history-week></history-week>
