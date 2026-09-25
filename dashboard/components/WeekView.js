@@ -62,7 +62,7 @@ export class WeekView extends LitElement {
 
   _renderItem({ record, count }) {
     const content = html`
-      <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
+      <hd-favicon .url=${record.url}></hd-favicon>
       <span class="week-item-title">${record.title || record.url}</span>
       ${count > 1 ? html`<span class="visit-count" aria-label=${`${count} 次访问`}>${count}</span>` : nothing}
     `;

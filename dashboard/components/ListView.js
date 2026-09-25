@@ -1,4 +1,4 @@
-import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
+import { LitElement, html, keyed, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
 
 export class ListView extends LitElement {
   static properties = {
@@ -55,7 +55,7 @@ export class ListView extends LitElement {
     const content = html`
       <span class="history-time">${this._timeFormatter.format(date)}</span>
       <span class="history-title" title=${record.title || record.url}>
-        <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
+        <hd-favicon .url=${record.url}></hd-favicon>
         <span class="history-title-text">${record.title || record.url}</span>
       </span>
       <span class="history-url" title=${record.url}>${record.url}</span>
@@ -72,7 +72,7 @@ export class ListView extends LitElement {
       <section class=${`history-day${collapsed ? " is-collapsed" : ""}`}>
         <h2 class="day-heading"><button class="day-toggle" type="button"
           aria-expanded=${String(!collapsed)} @click=${() => this._toggleDay(key)}>${this._dayHeading(date)}</button></h2>
-        ${repeat(records, (_record, index) => index, (record, index) => this._renderRow(record, index))}
+        ${repeat(records, record => record, (record, index) => this._renderRow(record, index))}
       </section>
     `;
   }
@@ -100,7 +100,9 @@ export class ListView extends LitElement {
         <span>标题</span><span>网址</span>
       </div>
       <p id="status" class="status" role="status" ?hidden=${status === null}>${status ?? nothing}</p>
-      <div id="results" class="results">${repeat(days, day => day.key, day => this._renderDay(day))}</div>
+      ${keyed(this._sortAscending, html`
+        <div id="results" class="results">${repeat(days, day => day.key, day => this._renderDay(day))}</div>
+      `)}
     `;
   }
 }

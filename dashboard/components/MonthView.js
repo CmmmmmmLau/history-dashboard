@@ -157,7 +157,7 @@ export class MonthView extends LitElement {
 
   _renderDetailItem({ record, count }) {
     const content = html`
-      <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
+      <hd-favicon .url=${record.url} size="14"></hd-favicon>
       <span class="details-time">${this._timeFormatter.format(new Date(record.visitTime)).slice(0, 5)}</span>
       <span class="details-title">${record.title || record.url}</span>
       ${count > 1 ? html`<span class="visit-count" aria-label=${`${count} 次访问`}>${count}</span>` : nothing}

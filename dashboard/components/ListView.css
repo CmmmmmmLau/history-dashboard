@@ -27,7 +27,6 @@ a.history-row.is-alt-row:hover { background: var(--color-hover); }
 .history-row > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 32px; }
 .history-time { color: var(--color-muted); text-align: right; font-variant-numeric: tabular-nums; }
 .history-title { display: flex; align-items: center; gap: 8px; font-weight: 500; }
-.history-title .site-icon { display: block; flex: none; width: 16px; height: 16px; }
 .history-title-text { overflow: hidden; min-width: 0; text-overflow: ellipsis; white-space: nowrap; }
 .history-url { color: var(--color-muted); }
 .status { margin: 0; padding: 36px 16px; color: var(--color-status); font-size: 13px; text-align: center; }

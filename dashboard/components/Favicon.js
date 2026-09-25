@@ -1,46 +1,43 @@
-import { LitElement, html, nothing } from "../../vendor/lit/lit-all-3.3.3.min.js";
+import { LitElement, css, html, nothing } from "../../vendor/lit/lit-all-3.3.3.min.js";
 
 export class Favicon extends LitElement {
+  static styles = css`
+    :host {
+      display: inline-block;
+      flex: none;
+    }
+
+    img {
+      display: block;
+      object-fit: contain;
+    }
+  `;
+
   static properties = {
-    pageUrl: { type: String },
+    url: { type: String },
+    size: { type: Number },
     _failed: { state: true }
   };
 
   constructor() {
     super();
-    this.pageUrl = "";
+    this.url = "";
+    this.size = 16;
     this._failed = false;
   }
 
-  // Keep the image in the parent view's shadow tree so its existing icon CSS applies.
-  createRenderRoot() {
-    return this;
-  }
-
-  willUpdate(changed) {
-    if (changed.has("pageUrl")) {
-      this._failed = false;
-      this.style.display = "";
-    }
-  }
-
-  _faviconUrl() {
-    const url = new URL(chrome.runtime.getURL("/_favicon/"));
-    url.searchParams.set("pageUrl", this.pageUrl);
-    url.searchParams.set("size", "16");
-    return url.toString();
-  }
-
-  _hideFailedIcon() {
-    this._failed = true;
-    this.style.display = "none";
-  }
-
   render() {
-    return this.pageUrl && !this._failed ? html`
-      <img src=${this._faviconUrl()} alt="" width="16" height="16" loading="lazy"
-        style="display:block;width:100%;height:100%;object-fit:contain"
-        @error=${this._hideFailedIcon}>
-    ` : nothing;
+    if (!this.url || this._failed) return nothing;
+
+    const size = Number.isFinite(this.size) && this.size > 0
+      ? Math.max(1, Math.round(this.size))
+      : 16;
+    const faviconUrl = new URL(chrome.runtime.getURL("/_favicon/"));
+    faviconUrl.searchParams.set("pageUrl", this.url);
+    faviconUrl.searchParams.set("size", String(size));
+    return html`
+      <img src=${faviconUrl.toString()} alt="" width=${size} height=${size} loading="lazy"
+        @error=${() => { this._failed = true; }}>
+    `;
   }
 }
