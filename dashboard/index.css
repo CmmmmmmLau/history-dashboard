@@ -14,13 +14,13 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 
 .dashboard { display: grid; grid-template-columns: 280px minmax(0, 1fr); min-height: 100vh; }
 .dashboard.is-calendar-hidden { grid-template-columns: minmax(0, 1fr); }
-.dashboard.is-calendar-hidden history-calendar { display: none; }
+.dashboard.is-calendar-hidden hd-calendar { display: none; }
 .content { min-width: 0; }
 .content:is(.is-week-view, .is-month-view) { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-.content.is-week-view history-week, .content.is-month-view history-month { flex: 1; min-height: 0; }
-.content:is(.is-week-view, .is-month-view) history-list,
-.content:not(.is-week-view) history-week,
-.content:not(.is-month-view) history-month { display: none; }
+.content.is-week-view hd-week, .content.is-month-view hd-month { flex: 1; min-height: 0; }
+.content:is(.is-week-view, .is-month-view) hd-list,
+.content:not(.is-week-view) hd-week,
+.content:not(.is-month-view) hd-month { display: none; }
 @media (max-width: 800px) {
   .dashboard { grid-template-columns: 252px minmax(0, 1fr); }
 }

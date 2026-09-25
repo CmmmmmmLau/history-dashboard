@@ -1,7 +1,6 @@
 import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
-import "./history-favicon.js";
 
-class HistoryWeek extends LitElement {
+export class WeekView extends LitElement {
   static properties = {
     _weekStart: { state: true },
     _records: { state: true },
@@ -63,7 +62,7 @@ class HistoryWeek extends LitElement {
 
   _renderItem({ record, count }) {
     const content = html`
-      <history-favicon class="site-icon" .pageUrl=${record.url}></history-favicon>
+      <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
       <span class="week-item-title">${record.title || record.url}</span>
       ${count > 1 ? html`<span class="visit-count" aria-label=${`${count} 次访问`}>${count}</span>` : nothing}
     `;
@@ -95,7 +94,7 @@ class HistoryWeek extends LitElement {
       }
     }
     return html`
-      <link rel="stylesheet" href=${new URL("./history-week.css", import.meta.url).href}>
+      <link rel="stylesheet" href=${new URL("./WeekView.css", import.meta.url).href}>
       <p id="status" class="status" role="status" ?hidden=${this._records !== null}>${this._statusMessage}</p>
       <div id="week-grid" class="week-grid" ?hidden=${this._records === null}>
         ${repeat([...days.values()], day => this._dayKey(day.date), day => this._renderDay(day))}
@@ -103,5 +102,3 @@ class HistoryWeek extends LitElement {
     `;
   }
 }
-
-customElements.define("history-week", HistoryWeek);

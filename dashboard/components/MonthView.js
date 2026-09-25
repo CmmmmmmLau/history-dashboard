@@ -1,7 +1,6 @@
 import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
-import "./history-favicon.js";
 
-class HistoryMonth extends LitElement {
+export class MonthView extends LitElement {
   static properties = {
     _monthStart: { state: true },
     _selectedDate: { state: true },
@@ -158,7 +157,7 @@ class HistoryMonth extends LitElement {
 
   _renderDetailItem({ record, count }) {
     const content = html`
-      <history-favicon class="site-icon" .pageUrl=${record.url}></history-favicon>
+      <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
       <span class="details-time">${this._timeFormatter.format(new Date(record.visitTime)).slice(0, 5)}</span>
       <span class="details-title">${record.title || record.url}</span>
       ${count > 1 ? html`<span class="visit-count" aria-label=${`${count} 次访问`}>${count}</span>` : nothing}
@@ -200,7 +199,7 @@ class HistoryMonth extends LitElement {
     const detailDays = [...dates].reverse().filter(date => date <= currentDay && byDay.get(date.getDate()).length > 0)
       .map(date => ({ date, records: byDay.get(date.getDate()) }));
     return html`
-      <link rel="stylesheet" href=${new URL("./history-month.css", import.meta.url).href}>
+      <link rel="stylesheet" href=${new URL("./MonthView.css", import.meta.url).href}>
       <p id="status" class="status" role="status" ?hidden=${this._records !== null}>${this._statusMessage}</p>
       <div id="layout" class="month-layout" ?hidden=${this._records === null}>
         <div class="month-calendar">
@@ -225,5 +224,3 @@ class HistoryMonth extends LitElement {
     `;
   }
 }
-
-customElements.define("history-month", HistoryMonth);

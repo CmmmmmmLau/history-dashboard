@@ -1,7 +1,7 @@
 import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
 import { getFirstDayOfWeek } from "../preferences.js";
 
-class HistoryCalendar extends LitElement {
+export class Calendar extends LitElement {
   static properties = {
     _rangeStart: { state: true },
     _rangeEnd: { state: true },
@@ -205,7 +205,7 @@ class HistoryCalendar extends LitElement {
     const today = new Date();
     const currentDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
     return html`
-      <link rel="stylesheet" href=${new URL("./history-calendar.css", import.meta.url).href}
+      <link rel="stylesheet" href=${new URL("./Calendar.css", import.meta.url).href}
         @load=${() => this.ensureSelectionVisible()}>
       <div class="calendar-toolbar">
         <div class="year-navigation">
@@ -226,5 +226,3 @@ class HistoryCalendar extends LitElement {
     `;
   }
 }
-
-customElements.define("history-calendar", HistoryCalendar);

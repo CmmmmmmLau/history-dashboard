@@ -4,7 +4,7 @@ const calendarIcon = unsafeCSS(new URL("../assets/system-uicons--calendar-days.s
 const chevronIcon = unsafeCSS(new URL("../assets/system-uicons--chevron-left.svg", import.meta.url).href);
 const refreshIcon = unsafeCSS(new URL("../assets/system-uicons--refresh.svg", import.meta.url).href);
 
-class HistoryIcon extends LitElement {
+export class Icon extends LitElement {
   static properties = {
     name: { type: String, reflect: true },
     size: { type: String },
@@ -56,5 +56,3 @@ class HistoryIcon extends LitElement {
     })}></span>`;
   }
 }
-
-customElements.define("history-icon", HistoryIcon);

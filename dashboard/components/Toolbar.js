@@ -1,8 +1,6 @@
 import { LitElement, css, html } from "../../vendor/lit/lit-all-3.3.3.min.js";
-import "./history-toolbar-button.js";
-import "./history-icon.js";
 
-class HistoryToolbar extends LitElement {
+export class Toolbar extends LitElement {
   static styles = css`
     :host {
       display: block;
@@ -102,7 +100,7 @@ class HistoryToolbar extends LitElement {
       align-items: center;
     }
 
-    .view-switcher history-toolbar-button + history-toolbar-button {
+    .view-switcher hd-toolbar-button + hd-toolbar-button {
       margin-left: -1px;
     }
 
@@ -178,10 +176,10 @@ class HistoryToolbar extends LitElement {
     return html`
       <header class="content-toolbar" @toolbar-button-click=${this._handleButtonClick}>
         <div class="search-area">
-          <history-toolbar-button action="toggle-calendar" icon-only controls="calendar"
+          <hd-toolbar-button action="toggle-calendar" icon-only controls="calendar"
             .label=${calendarLabel} .expanded=${!this.calendarHidden}>
-            <history-icon name="calendar" size="18" aria-hidden="true"></history-icon>
-          </history-toolbar-button>
+            <hd-icon name="calendar" size="18" aria-hidden="true"></hd-icon>
+          </hd-toolbar-button>
           <label class="sr-only" for="search">搜索所选范围的记录</label>
           <input id="search" type="search" placeholder="搜索所选范围的标题或网址" autocomplete="off"
             @input=${event => this._emit("search-input", { value: event.currentTarget.value })}>
@@ -192,30 +190,28 @@ class HistoryToolbar extends LitElement {
         </div>
         <div class="actions">
           <div class="range-navigation">
-            <history-toolbar-button action="previous-range" icon-only .label=${`上一${unit}`}>
-              <history-icon name="previous" size="20" aria-hidden="true"></history-icon>
-            </history-toolbar-button>
-            <history-toolbar-button action="next-range" icon-only .label=${`下一${unit}`}
+            <hd-toolbar-button action="previous-range" icon-only .label=${`上一${unit}`}>
+              <hd-icon name="previous" size="20" aria-hidden="true"></hd-icon>
+            </hd-toolbar-button>
+            <hd-toolbar-button action="next-range" icon-only .label=${`下一${unit}`}
               .disabled=${!this.canMoveNext}>
-              <history-icon name="next" size="20" aria-hidden="true"></history-icon>
-            </history-toolbar-button>
+              <hd-icon name="next" size="20" aria-hidden="true"></hd-icon>
+            </hd-toolbar-button>
             <div class="view-switcher" role="group" aria-label="历史记录视图">
-              <history-toolbar-button action="view-list" label="日视图" group-position="first"
-                .pressed=${this.view === "list"}>日</history-toolbar-button>
-              <history-toolbar-button action="view-week" label="周视图" group-position="middle"
-                .pressed=${this.view === "week"}>周</history-toolbar-button>
-              <history-toolbar-button action="view-month" label="月视图" group-position="last"
-                .pressed=${this.view === "month"}>月</history-toolbar-button>
+              <hd-toolbar-button action="view-list" label="日视图" group-position="first"
+                .pressed=${this.view === "list"}>日</hd-toolbar-button>
+              <hd-toolbar-button action="view-week" label="周视图" group-position="middle"
+                .pressed=${this.view === "week"}>周</hd-toolbar-button>
+              <hd-toolbar-button action="view-month" label="月视图" group-position="last"
+                .pressed=${this.view === "month"}>月</hd-toolbar-button>
             </div>
           </div>
-          <history-toolbar-button action="refresh-history" icon-only label="刷新">
-            <history-icon name="refresh" size="18" aria-hidden="true"></history-icon>
-          </history-toolbar-button>
-          <history-toolbar-button action="open-settings" label="设置">设置</history-toolbar-button>
+          <hd-toolbar-button action="refresh-history" icon-only label="刷新">
+            <hd-icon name="refresh" size="18" aria-hidden="true"></hd-icon>
+          </hd-toolbar-button>
+          <hd-toolbar-button action="open-settings" label="设置">设置</hd-toolbar-button>
         </div>
       </header>
     `;
   }
 }
-
-customElements.define("history-toolbar", HistoryToolbar);

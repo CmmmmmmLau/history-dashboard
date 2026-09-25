@@ -1,7 +1,6 @@
 import { LitElement, html, nothing, repeat } from "../../vendor/lit/lit-all-3.3.3.min.js";
-import "./history-favicon.js";
 
-class HistoryList extends LitElement {
+export class ListView extends LitElement {
   static properties = {
     _records: { state: true },
     _emptyMessage: { state: true },
@@ -56,7 +55,7 @@ class HistoryList extends LitElement {
     const content = html`
       <span class="history-time">${this._timeFormatter.format(date)}</span>
       <span class="history-title" title=${record.title || record.url}>
-        <history-favicon class="site-icon" .pageUrl=${record.url}></history-favicon>
+        <hd-favicon class="site-icon" .pageUrl=${record.url}></hd-favicon>
         <span class="history-title-text">${record.title || record.url}</span>
       </span>
       <span class="history-url" title=${record.url}>${record.url}</span>
@@ -92,7 +91,7 @@ class HistoryList extends LitElement {
     }
     const status = this._records === null ? this._statusMessage : this._records.length === 0 ? this._emptyMessage : null;
     return html`
-      <link rel="stylesheet" href=${new URL("./history-list.css", import.meta.url).href}>
+      <link rel="stylesheet" href=${new URL("./ListView.css", import.meta.url).href}>
       <div class="list-header">
         <span class="sort-column"><button id="sort-time" type="button"
           data-order=${this._sortAscending ? "asc" : "desc"}
@@ -105,5 +104,3 @@ class HistoryList extends LitElement {
     `;
   }
 }
-
-customElements.define("history-list", HistoryList);

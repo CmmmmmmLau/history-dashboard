@@ -1,6 +1,6 @@
 import { LitElement, html, nothing } from "../../vendor/lit/lit-all-3.3.3.min.js";
 
-class HistoryFavicon extends LitElement {
+export class Favicon extends LitElement {
   static properties = {
     pageUrl: { type: String },
     _failed: { state: true }
@@ -44,5 +44,3 @@ class HistoryFavicon extends LitElement {
     ` : nothing;
   }
 }
-
-customElements.define("history-favicon", HistoryFavicon);

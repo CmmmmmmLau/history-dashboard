@@ -1,6 +1,6 @@
 import { LitElement, css, html, nothing } from "../../vendor/lit/lit-all-3.3.3.min.js";
 
-class HistoryToolbarButton extends LitElement {
+export class ToolbarButton extends LitElement {
   static styles = css`
     :host {
       display: inline-flex;
@@ -121,5 +121,3 @@ class HistoryToolbarButton extends LitElement {
     `;
   }
 }
-
-customElements.define("history-toolbar-button", HistoryToolbarButton);

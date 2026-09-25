@@ -1,17 +1,13 @@
-import "./components/history-calendar.js";
-import "./components/history-list.js";
-import "./components/history-week.js";
-import "./components/history-month.js";
-import "./components/history-toolbar.js";
+import "./components/index.js";
 import { FIRST_DAY_OF_WEEK_KEY } from "./preferences.js";
 
-const calendar = document.querySelector("history-calendar");
+const calendar = document.querySelector("hd-calendar");
 const dashboard = document.querySelector(".dashboard");
 const content = document.querySelector(".content");
-const toolbar = document.querySelector("history-toolbar");
-const historyList = document.querySelector("history-list");
-const historyWeek = document.querySelector("history-week");
-const historyMonth = document.querySelector("history-month");
+const toolbar = document.querySelector("hd-toolbar");
+const historyList = document.querySelector("hd-list");
+const historyWeek = document.querySelector("hd-week");
+const historyMonth = document.querySelector("hd-month");
 
 const VIEW_STORAGE_KEY = "history-dashboard:view";
 const CALENDAR_HIDDEN_STORAGE_KEY = "history-dashboard:calendar-hidden";
