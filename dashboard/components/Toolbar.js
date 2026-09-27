@@ -153,6 +153,10 @@ export class Toolbar extends LitElement {
     this.calendarHidden = false;
   }
 
+  firstUpdated() {
+    this.renderRoot.querySelector("#search").focus({ preventScroll: true });
+  }
+
   get searchText() {
     return this.renderRoot.querySelector("#search")?.value.trim() ?? "";
   }
